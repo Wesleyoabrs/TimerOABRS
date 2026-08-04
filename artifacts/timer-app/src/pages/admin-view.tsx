@@ -69,7 +69,7 @@ export default function AdminView() {
     <div className="min-h-screen w-full bg-[#0d1321] font-sans flex flex-col relative text-white items-center justify-center">
       
       <div className="absolute top-6 right-6">
-         <a href={`/sala/${id}`} target="_blank" rel="noreferrer" className="text-xs border border-white/20 px-4 py-2 rounded text-gray-300 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors">
+         <a href={`/sala/${id}`} className="text-xs border border-white/20 px-4 py-2 rounded text-gray-300 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors">
            Modo Tela
          </a>
       </div>
