@@ -68,6 +68,12 @@ export default function AdminView() {
   return (
     <div className="min-h-screen w-full bg-[#0d1321] font-sans flex flex-col relative text-white items-center justify-center">
       
+      <div className="absolute top-6 left-6">
+         <Link href="/" className="text-xs border border-white/20 px-4 py-2 rounded text-gray-300 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors">
+           ← Salas
+         </Link>
+      </div>
+
       <div className="absolute top-6 right-6">
          <Link href={`/sala/${id}`} className="text-xs border border-white/20 px-4 py-2 rounded text-gray-300 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors">
            Modo Tela
