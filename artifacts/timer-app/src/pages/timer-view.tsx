@@ -57,7 +57,7 @@ export default function TimerView() {
 
       <Link 
         href={`/sala/${id}/admin`} 
-        className="absolute top-4 right-4 text-white text-xs font-bold tracking-widest uppercase py-2 px-4 rounded border border-white/30 bg-white/10 hover:bg-white/20 transition-colors"
+        className="absolute top-4 right-4 text-transparent hover:text-white text-xs font-bold tracking-widest uppercase py-2 px-4 rounded border border-transparent hover:border-white/30 hover:bg-white/10 transition-all duration-200"
       >
         CONTROLE
       </Link>
