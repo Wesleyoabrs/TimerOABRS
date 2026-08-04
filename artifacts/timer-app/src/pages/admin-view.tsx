@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { useTimer, TimerMode } from "@/hooks/use-timer";
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
@@ -69,9 +69,9 @@ export default function AdminView() {
     <div className="min-h-screen w-full bg-[#0d1321] font-sans flex flex-col relative text-white items-center justify-center">
       
       <div className="absolute top-6 right-6">
-         <a href={`/sala/${id}`} className="text-xs border border-white/20 px-4 py-2 rounded text-gray-300 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors">
+         <Link href={`/sala/${id}`} className="text-xs border border-white/20 px-4 py-2 rounded text-gray-300 font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors">
            Modo Tela
-         </a>
+         </Link>
       </div>
 
       <div className="bg-[#1a2333] border border-white/10 rounded-xl w-full max-w-[500px] p-8 shadow-2xl">
