@@ -60,8 +60,8 @@ export default function AdminView() {
     setTimer(mins * 60, state.mode);
   };
 
-  const displayMins = localMins.toString().padStart(2, "0");
-  const displaySecs = localSecs.toString().padStart(2, "0");
+  const displayMins = localMins.toString();
+  const displaySecs = localSecs.toString();
 
   const statusText = `${state.running ? "RODANDO" : "PARADO"} | ${state.mode === "countdown" ? "REGRESSIVO" : "PROGRESSIVO"}`;
 
