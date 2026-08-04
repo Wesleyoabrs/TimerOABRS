@@ -89,8 +89,8 @@ export default function AdminView() {
 
         {/* Status badge */}
         <div className="flex items-center justify-center gap-3 mb-7">
-          <span className={`w-2.5 h-2.5 rounded-full ${isRunning ? "bg-green-400 shadow-[0_0_8px_2px_rgba(74,222,128,0.5)]" : "bg-gray-500"}`} />
-          <span className={`text-sm font-black tracking-[0.2em] uppercase ${isRunning ? "text-green-400" : "text-gray-400"}`}>
+          <span className={`w-2.5 h-2.5 rounded-full ${isRunning ? "bg-green-400 shadow-[0_0_8px_2px_rgba(74,222,128,0.5)]" : "bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.4)]"}`} />
+          <span className={`text-sm font-black tracking-[0.2em] uppercase ${isRunning ? "text-green-400" : "text-red-400"}`}>
             {isRunning ? "RODANDO" : "PARADO"}
           </span>
           <span className="text-gray-600 font-bold">|</span>
