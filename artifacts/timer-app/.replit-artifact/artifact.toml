@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Timer System"
+description = "A real-time web timer system with 10 independent rooms. Each room has a full-screen countdown/countup display and a separate admin control panel. State is managed server-side via Socket.io so all viewers see the same time."
+version = "1.0.0"
+id = "artifacts/timer-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18459
+
+[services.development]
+run = "pnpm --filter @workspace/timer-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/timer-app", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/timer-app/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18459"
+BASE_PATH = "/"
