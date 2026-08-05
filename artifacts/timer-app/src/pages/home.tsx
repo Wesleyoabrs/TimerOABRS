@@ -69,7 +69,7 @@ export default function Home() {
             }
 
             return (
-              <Link key={room.id} href={`/sala/${room.id}`} className="block group">
+              <Link key={room.id} href={`/sala/${room.id}/admin`} className="block group">
                 <div className="bg-[#1a2333] border border-white/10 rounded-xl p-7 flex flex-col items-center justify-center transition-all duration-300 group-hover:bg-[#253247] group-hover:border-white/30 group-hover:shadow-2xl group-hover:-translate-y-1 cursor-pointer h-full">
                   <span className="text-4xl font-black mb-2 opacity-90 group-hover:opacity-100 transition-opacity">
                     {room.floor}°

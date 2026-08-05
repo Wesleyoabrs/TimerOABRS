@@ -2,6 +2,7 @@ import { useParams, Link } from "wouter";
 import { useTimer, TimerMode } from "@/hooks/use-timer";
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import { ROOMS } from "@/config/rooms";
 
 export default function AdminView() {
   const { id } = useParams<{ id: string }>();
@@ -52,6 +53,7 @@ export default function AdminView() {
 
   const isRunning = state.running;
   const modeLabel = state.mode === "countdown" ? "REGRESSIVO" : "PROGRESSIVO";
+  const room = ROOMS.find(r => r.id === id);
 
   return (
     <div className="min-h-screen w-full bg-[#0d1321] font-sans flex flex-col relative text-white items-center justify-center px-4 py-16">
@@ -82,9 +84,13 @@ export default function AdminView() {
             Painel de Controle
           </h1>
           <div className="text-sm font-bold tracking-widest uppercase">
-            <span className="text-gray-400">Sala</span>
-            <span className="text-white font-black ml-2">{id}</span>
+            <span className="text-white font-black">{room ? `${room.floor}° andar` : `Sala ${id}`}</span>
           </div>
+          {room?.sublabel && (
+            <div className="text-xs text-gray-500 font-bold tracking-wide mt-1 normal-case">
+              {room.sublabel}
+            </div>
+          )}
         </div>
 
         {/* Status badge */}
