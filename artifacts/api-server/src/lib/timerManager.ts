@@ -22,6 +22,7 @@ export interface RoomPayload {
   blocked: boolean;
 }
 
+const TOTAL_ROOMS = 14;
 const rooms = new Map<string, RoomState>();
 
 function getOrCreateRoom(roomId: string): RoomState {
@@ -60,8 +61,9 @@ function toPayload(state: RoomState): RoomPayload {
 function broadcastState(io: Server, roomId: string, state: RoomState) {
   const payload = toPayload(state);
   io.to(`room-${roomId}`).emit("timer:state", payload);
-  // Also push update to superadmin watchers
   io.to("superadmin").emit("superadmin:room_update", payload);
+  // Notify viewer (home page) of blocked status change
+  io.to("viewer").emit("viewer:room_status", { roomId: state.roomId, blocked: state.blocked });
 }
 
 function startTicking(io: Server, state: RoomState) {
@@ -89,9 +91,28 @@ function getAllPayloads(): RoomPayload[] {
   return Array.from(rooms.values()).map(toPayload);
 }
 
+function initAllRooms() {
+  for (let i = 1; i <= TOTAL_ROOMS; i++) {
+    getOrCreateRoom(String(i));
+  }
+}
+
 export function setupTimerSocket(io: Server) {
+  // Pre-create all rooms on startup
+  initAllRooms();
+
   io.on("connection", (socket: Socket) => {
     logger.info({ socketId: socket.id }, "Socket connected");
+
+    // --- Home page viewer (blocked status only) ---
+    socket.on("viewer:join", () => {
+      socket.join("viewer");
+      const statuses = Array.from(rooms.values()).map(s => ({
+        roomId: s.roomId,
+        blocked: s.blocked,
+      }));
+      socket.emit("viewer:all_statuses", statuses);
+    });
 
     // --- Regular room client ---
     socket.on("room:join", (roomId: string) => {
@@ -103,7 +124,7 @@ export function setupTimerSocket(io: Server) {
 
     socket.on("timer:set", (data: { roomId: string; seconds: number; mode: TimerMode }) => {
       const state = getOrCreateRoom(data.roomId);
-      if (state.blocked) return; // blocked rooms ignore commands
+      if (state.blocked) return;
       stopInterval(state);
       state.mode = data.mode;
       state.totalSeconds = data.seconds;
@@ -136,10 +157,6 @@ export function setupTimerSocket(io: Server) {
     // --- Superadmin ---
     socket.on("superadmin:join", () => {
       socket.join("superadmin");
-      // Pre-create all 13 rooms so the superadmin always sees them
-      for (let i = 1; i <= 13; i++) {
-        getOrCreateRoom(String(i));
-      }
       socket.emit("superadmin:all_states", getAllPayloads());
       logger.info({ socketId: socket.id }, "Superadmin joined");
     });
