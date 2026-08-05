@@ -13,7 +13,7 @@ export interface TimerState {
 }
 
 // Injeta diretamente a URL do Render para o Socket ignorar o link estático do Netlify
-const BACKEND_URL = "https://onrender.com"; 
+const BACKEND_URL = "https://timeroabrs.onrender.com"; 
 
 const socket: Socket = io(BACKEND_URL, {
   path: "/socket.io",
