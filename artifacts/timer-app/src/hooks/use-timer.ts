@@ -12,7 +12,10 @@ export interface TimerState {
   blocked: boolean;
 }
 
-const socket: Socket = io({
+// Injeta diretamente a URL do Render para o Socket ignorar o link estático do Netlify
+const BACKEND_URL = "https://onrender.com"; 
+
+const socket: Socket = io(BACKEND_URL, {
   path: "/socket.io",
   transports: ["websocket", "polling"],
 });
