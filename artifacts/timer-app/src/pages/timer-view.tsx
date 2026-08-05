@@ -64,7 +64,7 @@ export default function TimerView() {
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center overflow-hidden relative selection:bg-transparent cursor-default"
-      style={{ backgroundColor: bgColor, transition: "background-color 0.08s" }}
+      style={{ backgroundColor: bgColor, transition: "background-color 0.55s ease-in-out" }}
     >
       <div
         className="font-black flex items-center justify-center"
@@ -74,7 +74,7 @@ export default function TimerView() {
           lineHeight: 1,
           letterSpacing: "-0.02em",
           color: textColor,
-          transition: "color 0.08s",
+          transition: "color 0.55s ease-in-out",
         }}
       >
         <span style={{ fontVariantNumeric: "tabular-nums" }}>{mins}</span>
