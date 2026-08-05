@@ -9,9 +9,9 @@ export interface TimerState {
   currentSeconds: number;
   running: boolean;
   mode: TimerMode;
+  blocked: boolean;
 }
 
-// Ensure connection is established to the correct path
 const socket: Socket = io({
   path: "/socket.io",
   transports: ["websocket", "polling"],
@@ -24,6 +24,7 @@ export function useTimer(roomId: string) {
     currentSeconds: 0,
     running: false,
     mode: "countdown",
+    blocked: false,
   });
   const [isConnected, setIsConnected] = useState(socket.connected);
 
@@ -51,7 +52,6 @@ export function useTimer(roomId: string) {
     socket.on("disconnect", onDisconnect);
     socket.on("timer:state", onTimerState);
 
-    // Join room immediately if already connected
     if (socket.connected) {
       socket.emit("room:join", roomId);
     }
@@ -63,7 +63,6 @@ export function useTimer(roomId: string) {
     };
   }, [roomId]);
 
-  // Actions
   const setTimer = useCallback((seconds: number, mode: TimerMode) => {
     socket.emit("timer:set", { roomId, seconds, mode });
   }, [roomId]);
@@ -76,11 +75,5 @@ export function useTimer(roomId: string) {
     socket.emit("timer:mode", { roomId, mode });
   }, [roomId]);
 
-  return {
-    state,
-    isConnected,
-    setTimer,
-    resetTimer,
-    setMode,
-  };
+  return { state, isConnected, setTimer, resetTimer, setMode };
 }

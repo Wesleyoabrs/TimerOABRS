@@ -7,6 +7,7 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 import Home from '@/pages/home';
 import TimerView from '@/pages/timer-view';
 import AdminView from '@/pages/admin-view';
+import SuperAdmin from '@/pages/super-admin';
 
 const queryClient = new QueryClient();
 
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/sala/:id" component={TimerView} />
       <Route path="/sala/:id/admin" component={AdminView} />
+      <Route path="/superadmin" component={SuperAdmin} />
       <Route component={NotFound} />
     </Switch>
   );
