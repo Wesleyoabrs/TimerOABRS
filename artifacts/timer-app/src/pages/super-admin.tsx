@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useSuperAdmin } from "@/hooks/use-superadmin";
 import { ROOMS } from "@/config/rooms";
+import { useState, KeyboardEvent } from "react";
 
 function formatTime(totalSec: number) {
   const m = Math.floor(totalSec / 60);
@@ -10,12 +11,35 @@ function formatTime(totalSec: number) {
 
 export default function SuperAdmin() {
   const [, navigate] = useLocation();
-  const { roomStates, isConnected, blockRoom, resetRoom, resetAll } = useSuperAdmin();
+  const { roomStates, isConnected, blockRoom, resetRoom, resetAll, setRoomName } = useSuperAdmin();
+  // Local name inputs — keyed by roomId, tracks what the user is typing
+  const [localNames, setLocalNames] = useState<Record<string, string>>({});
+
+  function getNameValue(roomId: string): string {
+    if (localNames[roomId] !== undefined) return localNames[roomId];
+    return roomStates[roomId]?.customName ?? "";
+  }
+
+  function saveName(roomId: string) {
+    const name = getNameValue(roomId);
+    setRoomName(roomId, name);
+    // Clear local draft so we track server value again
+    setLocalNames(prev => { const n = { ...prev }; delete n[roomId]; return n; });
+  }
+
+  function handleNameKey(e: KeyboardEvent<HTMLInputElement>, roomId: string) {
+    if (e.key === "Enter") { e.currentTarget.blur(); }
+    if (e.key === "Escape") {
+      setLocalNames(prev => { const n = { ...prev }; delete n[roomId]; return n; });
+      e.currentTarget.blur();
+    }
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#07090f] text-white font-sans p-6">
-      {/* Header */}
       <div className="max-w-6xl mx-auto">
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-8 pt-2">
           <div>
             <h1 className="text-2xl font-black tracking-[0.2em] uppercase text-white">
@@ -53,6 +77,7 @@ export default function SuperAdmin() {
             const isBlocked = s?.blocked ?? false;
             const time = s ? formatTime(s.currentSeconds) : "--:--";
             const mode = s?.mode === "countup" ? "PROGRESSIVO" : "REGRESSIVO";
+            const nameValue = getNameValue(room.id);
 
             return (
               <div
@@ -72,6 +97,11 @@ export default function SuperAdmin() {
                     <div className="text-sm font-black text-white tracking-wide">
                       {room.floor}° andar
                     </div>
+                    {room.sublabel && (
+                      <div className="text-[10px] text-gray-600 font-bold mt-0.5 uppercase tracking-wide">
+                        {room.sublabel}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-1.5">
                     {isBlocked && (
@@ -96,11 +126,7 @@ export default function SuperAdmin() {
                 {/* Timer display */}
                 <div
                   className={`text-4xl font-black font-mono text-center py-3 rounded-lg tracking-tight ${
-                    isBlocked
-                      ? "text-red-700/50"
-                      : isRunning
-                      ? "text-white"
-                      : "text-gray-600"
+                    isBlocked ? "text-red-700/50" : isRunning ? "text-white" : "text-gray-600"
                   }`}
                 >
                   {time}
@@ -111,8 +137,28 @@ export default function SuperAdmin() {
                   {mode}
                 </div>
 
+                {/* Custom name input */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-gray-600 font-bold">
+                    Nome da sala
+                  </label>
+                  <input
+                    type="text"
+                    value={nameValue}
+                    placeholder="Opcional…"
+                    maxLength={60}
+                    onChange={e =>
+                      setLocalNames(prev => ({ ...prev, [room.id]: e.target.value }))
+                    }
+                    onBlur={() => saveName(room.id)}
+                    onKeyDown={e => handleNameKey(e, room.id)}
+                    className="w-full bg-[#0d1321] border border-white/10 focus:border-[#5a4cee]/60 rounded-lg px-3 py-2 text-xs text-white placeholder:text-gray-700 outline-none transition-colors font-medium"
+                  />
+                  <p className="text-[9px] text-gray-700">Enter para salvar · Esc para cancelar</p>
+                </div>
+
                 {/* Actions */}
-                <div className="flex gap-2 pt-1">
+                <div className="flex gap-2">
                   <button
                     onClick={() => resetRoom(room.id)}
                     disabled={isBlocked}

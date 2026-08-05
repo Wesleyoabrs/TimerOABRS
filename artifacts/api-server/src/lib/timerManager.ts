@@ -10,6 +10,7 @@ export interface RoomState {
   running: boolean;
   mode: TimerMode;
   blocked: boolean;
+  customName: string;
   intervalHandle: ReturnType<typeof setInterval> | null;
 }
 
@@ -20,6 +21,13 @@ export interface RoomPayload {
   running: boolean;
   mode: TimerMode;
   blocked: boolean;
+  customName: string;
+}
+
+export interface ViewerStatus {
+  roomId: string;
+  blocked: boolean;
+  customName: string;
 }
 
 const TOTAL_ROOMS = 14;
@@ -34,6 +42,7 @@ function getOrCreateRoom(roomId: string): RoomState {
       running: false,
       mode: "countdown",
       blocked: false,
+      customName: "",
       intervalHandle: null,
     });
   }
@@ -55,15 +64,19 @@ function toPayload(state: RoomState): RoomPayload {
     running: state.running,
     mode: state.mode,
     blocked: state.blocked,
+    customName: state.customName,
   };
+}
+
+function toViewerStatus(state: RoomState): ViewerStatus {
+  return { roomId: state.roomId, blocked: state.blocked, customName: state.customName };
 }
 
 function broadcastState(io: Server, roomId: string, state: RoomState) {
   const payload = toPayload(state);
   io.to(`room-${roomId}`).emit("timer:state", payload);
   io.to("superadmin").emit("superadmin:room_update", payload);
-  // Notify viewer (home page) of blocked status change
-  io.to("viewer").emit("viewer:room_status", { roomId: state.roomId, blocked: state.blocked });
+  io.to("viewer").emit("viewer:room_status", toViewerStatus(state));
 }
 
 function startTicking(io: Server, state: RoomState) {
@@ -98,19 +111,15 @@ function initAllRooms() {
 }
 
 export function setupTimerSocket(io: Server) {
-  // Pre-create all rooms on startup
   initAllRooms();
 
   io.on("connection", (socket: Socket) => {
     logger.info({ socketId: socket.id }, "Socket connected");
 
-    // --- Home page viewer (blocked status only) ---
+    // --- Home page viewer ---
     socket.on("viewer:join", () => {
       socket.join("viewer");
-      const statuses = Array.from(rooms.values()).map(s => ({
-        roomId: s.roomId,
-        blocked: s.blocked,
-      }));
+      const statuses = Array.from(rooms.values()).map(toViewerStatus);
       socket.emit("viewer:all_statuses", statuses);
     });
 
@@ -170,6 +179,13 @@ export function setupTimerSocket(io: Server) {
       }
       broadcastState(io, data.roomId, state);
       logger.info(data, "Room block toggled");
+    });
+
+    socket.on("superadmin:set_name", (data: { roomId: string; name: string }) => {
+      const state = getOrCreateRoom(data.roomId);
+      state.customName = data.name.trim();
+      broadcastState(io, data.roomId, state);
+      logger.info(data, "Room name updated");
     });
 
     socket.on("superadmin:reset_room", (data: { roomId: string }) => {

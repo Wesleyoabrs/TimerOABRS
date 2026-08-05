@@ -9,9 +9,9 @@ export interface RoomPayload {
   running: boolean;
   mode: TimerMode;
   blocked: boolean;
+  customName: string;
 }
 
-// Dedicated socket for superadmin (same server, separate logical concern)
 const saSocket: Socket = io({
   path: "/socket.io",
   transports: ["websocket", "polling"],
@@ -26,23 +26,17 @@ export function useSuperAdmin() {
       setIsConnected(true);
       saSocket.emit("superadmin:join");
     }
-
-    function onDisconnect() {
-      setIsConnected(false);
-    }
-
+    function onDisconnect() { setIsConnected(false); }
     function onAllStates(states: RoomPayload[]) {
       const map: Record<string, RoomPayload> = {};
       states.forEach(s => { map[s.roomId] = s; });
       setRoomStates(map);
     }
-
     function onRoomUpdate(state: RoomPayload) {
       setRoomStates(prev => ({ ...prev, [state.roomId]: state }));
     }
 
     if (saSocket.connected) onConnect();
-
     saSocket.on("connect", onConnect);
     saSocket.on("disconnect", onDisconnect);
     saSocket.on("superadmin:all_states", onAllStates);
@@ -68,5 +62,9 @@ export function useSuperAdmin() {
     saSocket.emit("superadmin:reset_all");
   }, []);
 
-  return { roomStates, isConnected, blockRoom, resetRoom, resetAll };
+  const setRoomName = useCallback((roomId: string, name: string) => {
+    saSocket.emit("superadmin:set_name", { roomId, name });
+  }, []);
+
+  return { roomStates, isConnected, blockRoom, resetRoom, resetAll, setRoomName };
 }

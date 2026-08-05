@@ -8,15 +8,12 @@ const CHEAT_CODE = "2236";
 export default function Home() {
   const [, navigate] = useLocation();
   const bufferRef = useRef<string>("");
-  const blockedMap = useRoomStatuses();
+  const statuses = useRoomStatuses();
 
   // Secret cheat code: type 2236 anywhere on this page
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (!e.key.match(/^\d$/)) {
-        bufferRef.current = "";
-        return;
-      }
+      if (!e.key.match(/^\d$/)) { bufferRef.current = ""; return; }
       bufferRef.current = (bufferRef.current + e.key).slice(-CHEAT_CODE.length);
       if (bufferRef.current === CHEAT_CODE) {
         bufferRef.current = "";
@@ -39,7 +36,10 @@ export default function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5 w-full">
           {ROOMS.map((room) => {
-            const isBlocked = blockedMap[room.id] === true;
+            const status = statuses[room.id];
+            const isBlocked = status?.blocked === true;
+            // customName from server takes priority; fall back to static sublabel
+            const sublabel = status?.customName || room.sublabel || "";
 
             if (isBlocked) {
               return (
@@ -47,15 +47,11 @@ export default function Home() {
                   key={room.id}
                   className="bg-[#12161f] border border-white/5 rounded-xl p-7 flex flex-col items-center justify-center cursor-not-allowed select-none opacity-60"
                 >
-                  <span className="text-3xl font-black mb-2 text-gray-700">
-                    {room.floor}°
-                  </span>
-                  <span className="text-xs uppercase tracking-[0.2em] text-gray-700 font-bold mb-2">
-                    andar
-                  </span>
-                  {room.sublabel && (
+                  <span className="text-3xl font-black mb-2 text-gray-700">{room.floor}°</span>
+                  <span className="text-xs uppercase tracking-[0.2em] text-gray-700 font-bold mb-1">andar</span>
+                  {sublabel && (
                     <span className="text-[9px] uppercase tracking-wider text-gray-700 font-bold text-center leading-tight mt-1">
-                      {room.sublabel}
+                      {sublabel}
                     </span>
                   )}
                   <span className="mt-3 text-[10px] uppercase tracking-widest text-red-700 font-black flex items-center gap-1">
@@ -70,16 +66,16 @@ export default function Home() {
 
             return (
               <Link key={room.id} href={`/sala/${room.id}/admin`} className="block group">
-                <div className="bg-[#1a2333] border border-white/10 rounded-xl p-7 flex flex-col items-center justify-center transition-all duration-300 group-hover:bg-[#253247] group-hover:border-white/30 group-hover:shadow-2xl group-hover:-translate-y-1 cursor-pointer h-full">
+                <div className="bg-[#1a2333] border border-white/10 rounded-xl p-7 flex flex-col items-center justify-center transition-all duration-300 group-hover:bg-[#253247] group-hover:border-white/30 group-hover:shadow-2xl group-hover:-translate-y-1 cursor-pointer h-full min-h-[120px]">
                   <span className="text-4xl font-black mb-2 opacity-90 group-hover:opacity-100 transition-opacity">
                     {room.floor}°
                   </span>
                   <span className="text-xs uppercase tracking-[0.2em] text-gray-400 group-hover:text-gray-200 font-bold">
                     andar
                   </span>
-                  {room.sublabel && (
+                  {sublabel && (
                     <span className="text-[9px] uppercase tracking-wider text-gray-500 group-hover:text-gray-300 font-bold text-center leading-tight mt-2 px-1">
-                      {room.sublabel}
+                      {sublabel}
                     </span>
                   )}
                 </div>
@@ -90,12 +86,10 @@ export default function Home() {
 
         <div className="mt-20 border border-white/10 bg-[#1a2333]/50 p-6 rounded-lg text-center max-w-2xl">
           <p className="text-gray-400 text-sm tracking-wide leading-relaxed">
-            Clique em um andar para abrir a tela do timer.<br />
-            Para acessar o painel de controle, adicione{" "}
-            <code className="bg-black px-2 py-1 rounded text-[#5a4cee] font-mono text-xs font-bold mx-1">
-              /admin
-            </code>{" "}
-            ao final da URL da sala.
+            Clique em um andar para abrir o painel de controle.<br />
+            Para abrir a tela do timer, clique em{" "}
+            <span className="text-white font-bold">Modo Tela</span>{" "}
+            dentro do painel.
           </p>
         </div>
       </div>

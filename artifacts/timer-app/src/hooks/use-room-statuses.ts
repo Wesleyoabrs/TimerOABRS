@@ -4,6 +4,7 @@ import { io, Socket } from "socket.io-client";
 export interface RoomStatus {
   roomId: string;
   blocked: boolean;
+  customName: string;
 }
 
 const viewerSocket: Socket = io({
@@ -12,7 +13,7 @@ const viewerSocket: Socket = io({
 });
 
 export function useRoomStatuses() {
-  const [statuses, setStatuses] = useState<Record<string, boolean>>({});
+  const [statuses, setStatuses] = useState<Record<string, RoomStatus>>({});
 
   useEffect(() => {
     function join() {
@@ -20,13 +21,13 @@ export function useRoomStatuses() {
     }
 
     function onAllStatuses(list: RoomStatus[]) {
-      const map: Record<string, boolean> = {};
-      list.forEach(s => { map[s.roomId] = s.blocked; });
+      const map: Record<string, RoomStatus> = {};
+      list.forEach(s => { map[s.roomId] = s; });
       setStatuses(map);
     }
 
     function onRoomStatus(s: RoomStatus) {
-      setStatuses(prev => ({ ...prev, [s.roomId]: s.blocked }));
+      setStatuses(prev => ({ ...prev, [s.roomId]: s }));
     }
 
     if (viewerSocket.connected) join();
