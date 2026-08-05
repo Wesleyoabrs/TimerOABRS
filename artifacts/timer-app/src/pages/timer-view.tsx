@@ -59,7 +59,7 @@ export default function TimerView() {
 
   // Flash state: red bg + light-gray digits ↔ black bg + red digits
   const bgColor = isZero ? (flashOn ? "#b91c1c" : "#000000") : "#000000";
-  const textColor = isZero ? (flashOn ? "#d1d5db" : "#b91c1c") : "#ffffff";
+  const textColor = isZero ? (flashOn ? "#d1d5db" : "#ffffff") : "#ffffff";
 
   return (
     <div
