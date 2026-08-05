@@ -7,20 +7,30 @@ export default function TimerView() {
   const { id } = useParams<{ id: string }>();
   const { state } = useTimer(id || "1");
   const [showBlink, setShowBlink] = useState(true);
+  const [flashOn, setFlashOn] = useState(true);
 
   const room = ROOMS.find(r => r.id === id);
-  const isZero = state.currentSeconds === 0 && !state.running && state.mode === "countdown";
+  const isZero = state.currentSeconds === 0 && !state.running && state.mode === "countdown" && state.totalSeconds > 0;
 
+  // Colon blink while running
   useEffect(() => {
     if (!state.running) {
       setShowBlink(true);
       return;
     }
-    const interval = setInterval(() => {
-      setShowBlink((prev) => !prev);
-    }, 500);
+    const interval = setInterval(() => setShowBlink(p => !p), 500);
     return () => clearInterval(interval);
   }, [state.running]);
+
+  // Full-screen flash when time is up
+  useEffect(() => {
+    if (!isZero) {
+      setFlashOn(true);
+      return;
+    }
+    const interval = setInterval(() => setFlashOn(p => !p), 700);
+    return () => clearInterval(interval);
+  }, [isZero]);
 
   const formatTime = (totalSec: number) => {
     const m = Math.floor(totalSec / 60);
@@ -47,21 +57,30 @@ export default function TimerView() {
     );
   }
 
+  // Flash state: red bg + light-gray digits ↔ black bg + red digits
+  const bgColor = isZero ? (flashOn ? "#b91c1c" : "#000000") : "#000000";
+  const textColor = isZero ? (flashOn ? "#d1d5db" : "#b91c1c") : "#ffffff";
+
   return (
-    <div className="min-h-screen w-full bg-black flex items-center justify-center overflow-hidden relative selection:bg-transparent cursor-default">
+    <div
+      className="min-h-screen w-full flex items-center justify-center overflow-hidden relative selection:bg-transparent cursor-default"
+      style={{ backgroundColor: bgColor, transition: "background-color 0.08s" }}
+    >
       <div
-        className={`font-black flex items-center justify-center transition-colors duration-300 ${isZero ? "text-red-600" : "text-white"}`}
+        className="font-black flex items-center justify-center"
         style={{
           fontFamily: "Inter, system-ui, sans-serif",
           fontSize: "clamp(20vw, 30vw, 45vh)",
           lineHeight: 1,
           letterSpacing: "-0.02em",
+          color: textColor,
+          transition: "color 0.08s",
         }}
       >
         <span style={{ fontVariantNumeric: "tabular-nums" }}>{mins}</span>
         <span
           className="relative -top-[1vw] mx-[0.5vw]"
-          style={{ opacity: showBlink ? 1 : 0 }}
+          style={{ opacity: isZero ? 1 : (showBlink ? 1 : 0) }}
         >
           :
         </span>
